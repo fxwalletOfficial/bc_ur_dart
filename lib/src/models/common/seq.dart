@@ -31,5 +31,5 @@ class URSeq {
   int get hashCode => num + length;
 
   @override
-  String toString() => '$length-$num';
+  String toString() => '$num-$length';
 }

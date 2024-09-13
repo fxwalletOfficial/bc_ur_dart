@@ -67,7 +67,7 @@ class UR {
   }
 
   /// Generate UR by string [value] in the format of ur:type/length-num/data.
-  static UR decode(String value) {
+  factory UR.decode(String value) {
     final components = value.getURMatch();
     if (components == null) throw InvalidFormatURException(input: value);
 
