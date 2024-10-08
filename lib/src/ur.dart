@@ -23,6 +23,7 @@ class UR {
 
   bool get isComplete => payload.isNotEmpty;
   bool get isFragment => seq.isFragment;
+  bool get isSingle => _fragments.length <= 1;
 
   /// Expected message length. Used for fragment UR.
   int _expectedMessageLength = 0;
