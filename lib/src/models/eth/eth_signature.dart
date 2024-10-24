@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:cbor/cbor.dart';
-import 'package:crypto_wallet_util/crypto_utils.dart';
 
 import 'package:bc_ur_dart/src/models/eth/eth_sign_request.dart';
 import 'package:bc_ur_dart/src/ur.dart';
@@ -27,7 +26,6 @@ class EthSignatureUR extends UR {
   }
 
   factory EthSignatureUR.fromSignature({required EthSignRequestUR request, required BigInt r, required BigInt s, required int v}) {
-    v = getV(v: v, chainId: request.chainId, txType: request.txType);
     final signature = Uint8List.fromList(bigIntToByte(r, 32) + bigIntToByte(s, 32) + [v]);
 
     final ur = UR.fromCBOR(
@@ -39,13 +37,6 @@ class EthSignatureUR extends UR {
     );
 
     return EthSignatureUR(uuid: request.uuid, signature: signature, type: ETH_SIGNATURE, payload: ur.payload);
-  }
-
-  static int getV({required int v, required int chainId, required EthTxType txType}) {
-    if (txType == EthTxType.eip1559) return v - 27;
-    if (txType == EthTxType.legacy) return v + chainId * 2 + 8;
-
-    return v;
   }
 
   BigInt get r => byteToBigInt(signature.sublist(0, 32));
