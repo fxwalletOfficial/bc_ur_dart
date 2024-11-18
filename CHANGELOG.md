@@ -9,3 +9,7 @@
 ## 0.1.3
 
 - Handle ETH signature v.
+
+## 0.1.4
+
+- Feature: Support read ur expected and received indexes for getting fragment progress.

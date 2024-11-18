@@ -45,9 +45,11 @@ class UR {
 
   /// Expected fragment indexes. It will be generate when start [read] fragment UR.
   final List<int> _expectedPartIndexes = [];
+  List<int> get expectedPartIndexes => _expectedPartIndexes;
 
   /// Received fragment indexes.
   final List<int> _receivedPartIndexes = [];
+  List<int> get receivedPartIndexes => _receivedPartIndexes;
 
   /// Mixed fragments.
   final List<FragmentUR> _mixedParts = [];
