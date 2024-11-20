@@ -27,9 +27,9 @@ class EthSignRequestUR extends UR {
 
   EthSignRequestUR({required UR ur, required this.uuid, required this.chainId, required this.dataType, required this.data, required this.address, this.origin = ''}) : super(payload: ur.payload, type: ur.type);
 
-  factory EthSignRequestUR.fromTypedTransaction({required EthTxData tx, required String address, required String path, required String origin, Uint8List? uuid}) {
+  factory EthSignRequestUR.fromTypedTransaction({required EthTxData tx, required String address, required String path, required String origin, Uint8List? uuid, required String xfp}) {
     uuid ??= _generateUUid();
-    final dataType = EthSignDataType.ETH_TYPED_TRANSACTION;
+    final dataType = tx.txType == EthTxType.legacy ? EthSignDataType.ETH_TRANSACTION_DATA : EthSignDataType.ETH_TYPED_TRANSACTION;
     final addr = EthereumAddress.fromHex(address);
     final msg = tx.serialize(sig: false);
 
@@ -42,7 +42,7 @@ class EthSignRequestUR extends UR {
         CborSmallInt(4): CborSmallInt(tx.network.chainId),
         CborSmallInt(5):  CborMap({
           CborSmallInt(1): CborList(getPath(path)),
-          CborSmallInt(2): CborInt(BigInt.from(4245356866))
+          CborSmallInt(2): CborInt(BigInt.parse(xfp))
         }, tags: [304]),
         CborSmallInt(6): CborBytes(addr.addressBytes),
         CborSmallInt(7): CborString(origin)

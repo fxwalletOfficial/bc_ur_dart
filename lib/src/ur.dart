@@ -80,7 +80,7 @@ class UR {
   }
 
   /// Generate UR by CBOR object.
-  UR.fromCBOR({required String type, required CborValue value, URSeq? seq, this.minLength = 10, this.maxLength = 100}) {
+  UR.fromCBOR({required String type, required CborValue value, URSeq? seq, this.minLength = 10, this.maxLength = 100, Uint8List? uuid}) {
     _type = type;
     _payload = Uint8List.fromList(cbor.encode(value));
     if (seq != null) _seq.copy(seq);

@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:bc_ur_dart/bc_ur_dart.dart';
 import 'package:bc_ur_dart/src/models/eth/eth_sign_request.dart';
 import 'package:bc_ur_dart/src/models/eth/eth_signature.dart';
 import 'package:bc_ur_dart/src/ur.dart';
@@ -29,13 +30,13 @@ void main() {
   final code = 'UR:ETH-SIGNATURE/OEADTPDAGDAEADAOAXAAAHAMATAYASBKBDBNBTBABSAOHDFPAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEADAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAEAOVWUTKBWSRY';
 
   test('Eth signature encode', () {
-    final request = EthSignRequestUR.fromTypedTransaction(tx: tx, address: address, path: path, uuid: uuid, origin: origin);
+    final request = EthSignRequestUR.fromTypedTransaction(tx: tx, address: address, path: path, uuid: uuid, origin: origin, xfp: MASTER_FINGERPRINT);
     final ur = EthSignatureUR.fromSignature(request: request, r: BigInt.one, s: BigInt.two, v: 0);
     expect(ur.encode(), code);
   });
 
   test('Eth signature decode', () {
-    final request = EthSignRequestUR.fromTypedTransaction(tx: tx, address: address, path: path, uuid: uuid, origin: origin);
+    final request = EthSignRequestUR.fromTypedTransaction(tx: tx, address: address, path: path, uuid: uuid, origin: origin, xfp: MASTER_FINGERPRINT);
     final target = EthSignatureUR.fromSignature(request: request, r: BigInt.one, s: BigInt.two, v: 0);
 
     final ur = UR.decode(code);

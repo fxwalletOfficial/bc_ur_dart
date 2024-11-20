@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:bc_ur_dart/bc_ur_dart.dart';
 import 'package:bc_ur_dart/src/models/eth/eth_sign_request.dart';
 import 'package:bc_ur_dart/src/ur.dart';
 import 'package:convert/convert.dart';
@@ -37,7 +38,7 @@ void main() {
   ];
 
   test('Eth sign request typed transaction encode', () {
-    final ur = EthSignRequestUR.fromTypedTransaction(tx: tx, address: address, path: path, uuid: uuid, origin: origin);
+    final ur = EthSignRequestUR.fromTypedTransaction(tx: tx, address: address, path: path, uuid: uuid, origin: origin, xfp: MASTER_FINGERPRINT);
     ur.maxLength = 80;
 
     for (final item in urs) {

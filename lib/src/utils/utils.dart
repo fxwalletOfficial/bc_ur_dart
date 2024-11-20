@@ -5,6 +5,17 @@ import 'package:cbor/cbor.dart';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart' as crypto;
 
+String toHex(Uint8List data, {bool addPrefix = false}) {
+  final buffer = StringBuffer();
+  if (addPrefix) {
+    buffer.write('0x');
+  }
+  for (var byte in data) {
+    buffer.write(byte.toRadixString(16).padLeft(2, '0'));
+  }
+  return buffer.toString();
+}
+
 Uint8List intToByte(int value, int length) {
   final data = Uint8List(length);
 
