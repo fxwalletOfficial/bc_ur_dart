@@ -10,6 +10,7 @@ import 'package:bc_ur_dart/src/utils/error.dart';
 import 'package:bc_ur_dart/src/models/common/seq.dart';
 import 'package:bc_ur_dart/src/utils/type.dart';
 import 'package:bc_ur_dart/src/utils/utils.dart';
+import 'package:uuid/uuid.dart';
 
 class UR {
   String _type = '';
@@ -17,6 +18,9 @@ class UR {
 
   Uint8List _payload = Uint8List(0);
   Uint8List get payload => _payload;
+
+  Uint8List _uuid = Uint8List(0);
+  Uint8List get uuid => _uuid;
 
   final URSeq _seq = URSeq(length: 0, num: 0);
   URSeq get seq => _seq;
@@ -63,9 +67,10 @@ class UR {
   /// fragments to complete UR.
   final List<Uint8List> _fragments = [];
 
-  UR({String type = '', Uint8List? payload, URSeq? seq, this.minLength = 10, this.maxLength = 100}) {
+  UR({String type = '', Uint8List? payload, URSeq? seq, this.minLength = 10, this.maxLength = 100, Uint8List? uuid}) {
     _type = type;
     _payload = payload ?? Uint8List(0);
+    _uuid = uuid ?? _generateUUid();
     _seq.copy(seq);
   }
 
@@ -85,6 +90,7 @@ class UR {
   UR.fromCBOR({required String type, required CborValue value, URSeq? seq, this.minLength = 10, this.maxLength = 100, Uint8List? uuid}) {
     _type = type;
     _payload = Uint8List.fromList(cbor.encode(value));
+    _uuid = uuid ?? _generateUUid();
     if (seq != null) _seq.copy(seq);
   }
 
@@ -297,4 +303,6 @@ class UR {
 
     return Uint8List.fromList(result);
   }
+
+  static Uint8List _generateUUid() => Uuid().v8obj().toBytes();
 }

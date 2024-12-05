@@ -36,79 +36,67 @@ const String MASTER_FINGERPRINT = '4245356866';
 
 class CryptoMultiAccountsUR extends UR {
   // final BIP32 wallet;
-  final List<CryptoAccountItem> chains;
+  final List<CryptoAccountItemUR> chains;
   final String masterFingerprint;
   final String device;
   final String walletName;
 
   CryptoMultiAccountsUR({required UR ur, required this.chains, required this.device, required this.walletName, required this.masterFingerprint}) : super(payload: ur.payload, type: ur.type);
 
-  // CryptoMultiAccountsUR.fromWallet({
-  //   required this.name,
-  //   required this.path,
-  //   required this.wallet
-  // }) : super.fromCBOR(
-  //   type: CRYPTO_MULTI_ACCOUNTS,
-  //   value: CborMap({
-  //     CborSmallInt(3): CborBytes(wallet.publicKey),
-  //     CborSmallInt(4): CborBytes(wallet.chainCode),
-  //     CborSmallInt(6):  CborMap({
-  //       CborSmallInt(1): CborList(getPath(path)),
-  //       CborSmallInt(2): CborInt(BigInt.from(wallet.parentFingerprint))
-  //     }, tags: [304]),
-  //     CborSmallInt(8): CborInt(BigInt.from(wallet.parentFingerprint)),
-  //     CborSmallInt(9): CborString(name)
-  //   })
-  // );
-
   static CryptoMultiAccountsUR fromUR({required UR ur}) {
     if (ur.type.toUpperCase() != CRYPTO_MULTI_ACCOUNTS) throw Exception('Invalid type');
-
     final data = ur.decodeCBOR() as CborMap;
 
-    final masterFingerprint = (data[CborSmallInt(1)] as CborBigInt).toString();
-    print(masterFingerprint);
+    final masterFingerprint = (data[CborSmallInt(1)] as CborInt).toBigInt();
 
     final chains = (data[CborSmallInt(2)] as CborList);
-    List<CryptoAccountItem> chainList = [];
+    List<CryptoAccountItemUR> chainList = [];
 
     for (final item in chains) {
-      final chainInfo = CryptoAccountItem.fromCborMap(item as CborMap);
+      final chainInfo = CryptoAccountItemUR.fromCborMap(item as CborMap);
       if (chainInfo != null) chainList.add(chainInfo);
     }
 
     final name = data[CborSmallInt(3)].toString();
     final walletName = data[CborSmallInt(6)].toString();
 
-    return CryptoMultiAccountsUR(ur: ur, chains: chainList, device: name, walletName: walletName, masterFingerprint: masterFingerprint);
+    return CryptoMultiAccountsUR(ur: ur, chains: chainList, device: name, walletName: walletName, masterFingerprint: getXfp(masterFingerprint));
   }
-
-//   @override
-//   String toString() => '''
-// {
-// "derivationPath":"$path"
-// "masterFingerprint":"${hex.encode(wallet.fingerprint)}"
-// "extendedPublicKey": "${wallet.toBase58()}",
-// "chainCode": "${hex.encode(wallet.chainCode)}"
-// "walletName":"$name"
-// }
-//   ''';
 }
 
-class CryptoAccountItem {
+class CryptoAccountItemUR extends UR{
   final String path;
   final String chain;
   final BIP32 wallet;
   String coin;
 
-  CryptoAccountItem({
+  CryptoAccountItemUR({
     required this.path,
     required this.wallet,
     required this.chain,
-    this.coin = '',
+    this.coin = ''
   });
 
-  static CryptoAccountItem? fromCborMap(CborMap data) {
+  CryptoAccountItemUR.fromAccount({
+    required this.path,
+    required this.chain,
+    required this.wallet,
+    this.coin = ''
+  }) : super.fromCBOR(
+    type: CRYPTO_MULTI_ACCOUNTS,
+    value: CborMap({
+      CborSmallInt(3): CborBytes(wallet.publicKey),
+      CborSmallInt(4): CborBytes(wallet.chainCode),
+      CborSmallInt(6):  CborMap({
+        CborSmallInt(1): CborList(getPath(path)),
+        CborSmallInt(2): CborInt(BigInt.parse(MASTER_FINGERPRINT))
+      }, tags: [304]),
+      CborSmallInt(8): CborInt(BigInt.parse(MASTER_FINGERPRINT)),
+      CborSmallInt(10): CborString(chain)
+    })
+  );
+
+  static CryptoAccountItemUR? fromCborMap(CborMap data) {
     if (data[CborSmallInt(4)] == null) return null;
     // Wallet.
     final publicKey = Uint8List.fromList((data[CborSmallInt(3)] as CborBytes).bytes);
@@ -143,6 +131,6 @@ class CryptoAccountItem {
     if (chains.isEmpty) return null;
     final chain = chains.first.toString();
 
-    return CryptoAccountItem(path: path, wallet: wallet, chain: chain);
+    return CryptoAccountItemUR(path: path, wallet: wallet, chain: chain);
   }
 }

@@ -6,8 +6,11 @@ export 'package:crypto_wallet_util/crypto_utils.dart' show EthTxData, EthTxDataR
 
 export 'package:bc_ur_dart/src/models/common/fragment.dart';
 export 'package:bc_ur_dart/src/models/common/seq.dart';
-export 'package:bc_ur_dart/src/models/btc/btc_sign_request.dart';
-export 'package:bc_ur_dart/src/models/btc/btc_signature.dart';
+export 'package:bc_ur_dart/src/models/btc/gspl_sign_request.dart';
+export 'package:bc_ur_dart/src/models/btc/gspl_signature.dart';
+export 'package:bc_ur_dart/src/models/btc/gspl_tx_data.dart';
+export 'package:bc_ur_dart/src/models/btc/psbt_sign_request.dart';
+export 'package:bc_ur_dart/src/models/btc/psbt_signature.dart';
 export 'package:bc_ur_dart/src/models/eth/eth_sign_request.dart';
 export 'package:bc_ur_dart/src/models/eth/eth_signature.dart';
 export 'package:bc_ur_dart/src/models/key/crypto_hdkey.dart';

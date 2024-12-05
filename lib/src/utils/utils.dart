@@ -5,17 +5,6 @@ import 'package:cbor/cbor.dart';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart' as crypto;
 
-String toHex(Uint8List data, {bool addPrefix = false}) {
-  final buffer = StringBuffer();
-  if (addPrefix) {
-    buffer.write('0x');
-  }
-  for (var byte in data) {
-    buffer.write(byte.toRadixString(16).padLeft(2, '0'));
-  }
-  return buffer.toString();
-}
-
 Uint8List intToByte(int value, int length) {
   final data = Uint8List(length);
 
@@ -58,6 +47,20 @@ Uint8List sha256(List<int> value) {
   return Uint8List.fromList(digest.bytes);
 }
 
+Uint8List fromHex(String data) {
+  if (data.startsWith("0x")) {
+    data = data.substring(2);
+  }
+
+  final result = Uint8List(data.length ~/ 2);
+
+  for (int i = 0; i < data.length; i += 2) {
+    result[i ~/ 2] = int.parse(data.substring(i, i + 2), radix: 16);
+  }
+
+  return result;
+}
+
 bool arraysEqual(List a, List b) {
   if (a.length != b.length) return false;
   return a.every((e) => b.contains(e));
@@ -87,5 +90,24 @@ List<CborValue> getPath(String path) {
   }
 
   return items;
+}
+
+String getXfp(BigInt xfpCode) {
+  String code = xfpCode.toRadixString(16);
+  if (code.length < 8) {
+    final len = code.length;
+    for (int i = 0; i < 8 - len; i++) {
+      code = '0$code';
+    }
+  }
+
+  final bytes = Uint8List.fromList(hex.decode(code));
+  final reverse = bytes.reversed.toList();
+  return hex.encode(Uint8List.fromList(reverse));
+}
+
+BigInt toXfpCode(String xfp) {
+  final reverse = Uint8List.fromList(hex.decode(xfp)).reversed.toList();
+  return BigInt.parse(hex.encode(reverse), radix: 16);
 }
 

@@ -35,6 +35,7 @@ class EthSignRequestUR extends UR {
 
     final ur = UR.fromCBOR(
       type: ETH_SIGN_REQUEST,
+      uuid: uuid,
       value: CborMap({
         CborSmallInt(1): CborBytes(uuid, tags: [37]),
         CborSmallInt(2): CborBytes(msg),
@@ -42,7 +43,7 @@ class EthSignRequestUR extends UR {
         CborSmallInt(4): CborSmallInt(tx.network.chainId),
         CborSmallInt(5):  CborMap({
           CborSmallInt(1): CborList(getPath(path)),
-          CborSmallInt(2): CborInt(BigInt.parse(xfp))
+          CborSmallInt(2): CborInt(toXfpCode(xfp))
         }, tags: [304]),
         CborSmallInt(6): CborBytes(addr.addressBytes),
         CborSmallInt(7): CborString(origin)
