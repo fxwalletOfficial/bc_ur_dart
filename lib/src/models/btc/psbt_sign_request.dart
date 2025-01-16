@@ -21,7 +21,6 @@ class PsbtSignRequestUR extends UR {
     final dataType = BtcSignDataType.TRANSACTION;
 
     final ur = UR.fromCBOR(
-      uuid: uuid,
       type: PSBT_SIGN_REQUEST,
       value: CborMap({
         CborSmallInt(1): CborBytes(uuid, tags: [37]),

@@ -19,9 +19,6 @@ class UR {
   Uint8List _payload = Uint8List(0);
   Uint8List get payload => _payload;
 
-  Uint8List _uuid = Uint8List(0);
-  Uint8List get uuid => _uuid;
-
   final URSeq _seq = URSeq(length: 0, num: 0);
   URSeq get seq => _seq;
 
@@ -67,10 +64,9 @@ class UR {
   /// fragments to complete UR.
   final List<Uint8List> _fragments = [];
 
-  UR({String type = '', Uint8List? payload, URSeq? seq, this.minLength = 10, this.maxLength = 100, Uint8List? uuid}) {
+  UR({String type = '', Uint8List? payload, URSeq? seq, this.minLength = 10, this.maxLength = 100}) {
     _type = type;
     _payload = payload ?? Uint8List(0);
-    _uuid = uuid ?? _generateUUid();
     _seq.copy(seq);
   }
 
@@ -87,10 +83,9 @@ class UR {
   }
 
   /// Generate UR by CBOR object.
-  UR.fromCBOR({required String type, required CborValue value, URSeq? seq, this.minLength = 10, this.maxLength = 100, Uint8List? uuid}) {
+  UR.fromCBOR({required String type, required CborValue value, URSeq? seq, this.minLength = 10, this.maxLength = 100}) {
     _type = type;
     _payload = Uint8List.fromList(cbor.encode(value));
-    _uuid = uuid ?? _generateUUid();
     if (seq != null) _seq.copy(seq);
   }
 

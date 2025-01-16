@@ -35,7 +35,6 @@ const String MASTER_FINGERPRINT = '4245356866';
 /// chain-code-bytes = bytes .size 32
 
 class CryptoMultiAccountsUR extends UR {
-  // final BIP32 wallet;
   final List<CryptoAccountItemUR> chains;
   final String masterFingerprint;
   final String device;
@@ -64,46 +63,46 @@ class CryptoMultiAccountsUR extends UR {
   }
 }
 
-class CryptoAccountItemUR extends UR{
+class CryptoAccountItemUR extends UR {
   final String path;
-  final String chain;
-  final BIP32 wallet;
+  final List<String> chains;
+  final BIP32? wallet;
+  final Uint8List publicKey;
   String coin;
 
   CryptoAccountItemUR({
     required this.path,
-    required this.wallet,
-    required this.chain,
+    required this.chains,
+    required this.publicKey,
+    this.wallet,
     this.coin = ''
   });
 
   CryptoAccountItemUR.fromAccount({
     required this.path,
-    required this.chain,
-    required this.wallet,
+    required this.chains,
+    required this.publicKey,
+    this.wallet,
     this.coin = ''
   }) : super.fromCBOR(
     type: CRYPTO_MULTI_ACCOUNTS,
     value: CborMap({
-      CborSmallInt(3): CborBytes(wallet.publicKey),
-      CborSmallInt(4): CborBytes(wallet.chainCode),
+      CborSmallInt(3): CborBytes(publicKey),
+      if (wallet != null) CborSmallInt(4): CborBytes(wallet.chainCode),
       CborSmallInt(6):  CborMap({
         CborSmallInt(1): CborList(getPath(path)),
         CborSmallInt(2): CborInt(BigInt.parse(MASTER_FINGERPRINT))
       }, tags: [304]),
       CborSmallInt(8): CborInt(BigInt.parse(MASTER_FINGERPRINT)),
-      CborSmallInt(10): CborString(chain)
+      CborSmallInt(10): CborMap({
+        CborString('chain'): CborList(chains.map((e) => CborString(e)).toList())
+      })
     })
   );
 
   static CryptoAccountItemUR? fromCborMap(CborMap data) {
-    if (data[CborSmallInt(4)] == null) return null;
-    // Wallet.
+    // Public key.
     final publicKey = Uint8List.fromList((data[CborSmallInt(3)] as CborBytes).bytes);
-    final chainCode = Uint8List.fromList((data[CborSmallInt(4)] as CborBytes).bytes);
-    final wallet = BIP32.fromPublicKey(publicKey, chainCode);
-
-    final parentFingerprint = (data[CborSmallInt(8)] as CborInt).toInt();
 
     // Path.
     final components = (data[CborSmallInt(6)] as CborMap)[CborSmallInt(1)] as CborList;
@@ -121,16 +120,23 @@ class CryptoAccountItemUR extends UR{
       }
     }
 
-    wallet.parentFingerprint = parentFingerprint;
-    wallet.depth = (components.length / 2).round();
-    wallet.index = index;
+    BIP32? wallet;
+    if (data[CborSmallInt(4)] != null) {
+      final parentFingerprint = (data[CborSmallInt(8)] as CborInt).toInt();
+      final chainCode = Uint8List.fromList((data[CborSmallInt(4)] as CborBytes).bytes);
+
+      // BIP32 wallet.
+      wallet = BIP32.fromPublicKey(publicKey, chainCode);
+      wallet.parentFingerprint = parentFingerprint;
+      wallet.depth = (components.length / 2).round();
+      wallet.index = index;
+    }
 
     // Note.
     final note = data[CborSmallInt(10)].toString();
-    final chains = (json.decode(note)['chain'] ?? []) as List;
+    final chains = ((json.decode(note)['chain'] ?? []) as List).map((e) => e.toString()).toList();
     if (chains.isEmpty) return null;
-    final chain = chains.first.toString();
 
-    return CryptoAccountItemUR(path: path, wallet: wallet, chain: chain);
+    return CryptoAccountItemUR(path: path, wallet: wallet, chains: chains, publicKey: publicKey);
   }
 }

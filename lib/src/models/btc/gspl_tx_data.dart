@@ -62,4 +62,9 @@ class GsplItem {
       signature: signature
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'amount': amount.toString(),
+    'address': address
+  };
 }

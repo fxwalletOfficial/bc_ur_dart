@@ -29,7 +29,6 @@ class GsplSignRequestUR extends UR {
     final GsplTxData gspl = GsplTxData(dataType: BtcSignDataType.TRANSACTION, inputs: inputs, change: change, hex: hex);
 
     final ur = UR.fromCBOR(
-      uuid: uuid,
       type: BTC_SIGN_REQUEST,
       value: CborMap({
         CborSmallInt(1): CborBytes(uuid, tags: [37]),
