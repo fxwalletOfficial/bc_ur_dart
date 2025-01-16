@@ -17,3 +17,7 @@
 ## 0.1.5
 
 - Feature: Support BTC PSBT format.
+
+## 0.1.6
+
+- Handle the usage of uuid.
