@@ -21,3 +21,7 @@
 ## 0.1.6
 
 - Handle the usage of uuid.
+
+## 0.1.7
+
+- Handle ETH signature v.

@@ -26,7 +26,8 @@ class EthSignatureUR extends UR {
   }
 
   factory EthSignatureUR.fromSignature({required EthSignRequestUR request, required BigInt r, required BigInt s, required int v}) {
-    final signature = Uint8List.fromList(bigIntToByte(r, 32) + bigIntToByte(s, 32) + [v]);
+    int vData = handleV(v);
+    final signature = Uint8List.fromList(bigIntToByte(r, 32) + bigIntToByte(s, 32) + [vData]);
 
     final ur = UR.fromCBOR(
       type: ETH_SIGNATURE,
@@ -37,6 +38,14 @@ class EthSignatureUR extends UR {
     );
 
     return EthSignatureUR(uuid: request.uuid, signature: signature, type: ETH_SIGNATURE, payload: ur.payload);
+  }
+
+  static int handleV(int v) {
+    if (v == 0 || v == 1) return v;
+    if (v == 27 || v == 28) return v - 27;
+    if (v > 35) return (v - 35) % 2;
+
+    throw Exception('Invalid signature: v - $v');
   }
 
   BigInt get r => byteToBigInt(signature.sublist(0, 32));
