@@ -25,7 +25,7 @@ class GsplTxData {
   factory GsplTxData.fromCbor({required CborMap data}) {
     final hex = Uint8List.fromList((data[CborSmallInt(1)] as CborBytes).bytes);
     List<GsplItem>? inputs = (data[CborSmallInt(3)] as CborList).map((e) => GsplItem.fromCbor(data: e as CborMap)).toList();
-    GsplItem change = GsplItem.fromCbor(data: data[CborSmallInt(4)] as CborMap);
+    GsplItem? change = data[CborSmallInt(4)] == null ? null : GsplItem.fromCbor(data: data[CborSmallInt(4)] as CborMap);
 
     return GsplTxData(inputs: inputs, hex: bytesToHex(hex), dataType: BtcSignDataType.TRANSACTION, change: change);
   }

@@ -25,3 +25,7 @@
 ## 0.1.7
 
 - Handle ETH signature v.
+
+## 0.1.8
+
+- Handle the change data of Gspl protocol.
