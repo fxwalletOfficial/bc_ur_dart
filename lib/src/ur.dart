@@ -125,14 +125,14 @@ class UR {
         seq.length == ur.seq.length &&
         _expectedMessageLength == ur.messageLength &&
         _expectedChecksum == ur.checksum &&
-        _expectedFragmentLength == ur.payload.length;
+        _expectedFragmentLength == ur.part.length;
     }
 
     _type = ur.type;
     seq.length = ur.seq.length;
     _expectedMessageLength = ur.messageLength;
     _expectedChecksum = ur.checksum;
-    _expectedFragmentLength = ur.payload.length;
+    _expectedFragmentLength = ur.part.length;
 
     if (seq.length > 0) {
       _expectedPartIndexes.clear();

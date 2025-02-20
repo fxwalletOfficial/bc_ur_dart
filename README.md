@@ -6,7 +6,7 @@ A dart plugin for Uniform Resources(URs) decode/encode. URs are URI-encoded CBOR
 ### Install
 ```
 dependencies:
-  bc_ur_dart: ^0.1.2
+  bc_ur_dart: ^0.1.9
 ```
 
 ### Usage

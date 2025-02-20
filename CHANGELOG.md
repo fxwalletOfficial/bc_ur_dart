@@ -29,3 +29,7 @@
 ## 0.1.8
 
 - Handle the change data of Gspl protocol.
+
+## 0.1.9
+
+- Fix: Handle fragment check.
