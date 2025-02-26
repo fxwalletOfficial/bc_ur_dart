@@ -32,4 +32,8 @@
 
 ## 0.1.9
 
+- Fix: Handle fragment check.
+
+## 0.1.10
+
 - Feature: Support typed data and raw data of evm transaction types.
