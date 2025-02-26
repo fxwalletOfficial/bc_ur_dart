@@ -29,3 +29,7 @@
 ## 0.1.8
 
 - Handle the change data of Gspl protocol.
+
+## 0.1.9
+
+- Feature: Support typed data and raw data of evm transaction types.

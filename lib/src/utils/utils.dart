@@ -61,6 +61,39 @@ Uint8List fromHex(String data) {
   return result;
 }
 
+Uint8List toUtf8Bytes(String str) {
+  List<int> utf8 = [];
+
+  for (int i = 0; i < str.length; i++) {
+    int data = str.codeUnitAt(i);
+
+    if (data < 0x80) {
+      utf8.add(data);
+    } else if (data < 0x800) {
+      utf8.add(0xc0 | (data >> 6));
+      utf8.add(0x80 | (data & 0x3f));
+    } else if (data < 0xd800 || data >= 0xe000) {
+      utf8.add(0xe0 | (data >> 12));
+      utf8.add(0x80 | ((data >> 6) & 0x3f));
+      utf8.add(0x80 | (data & 0x3f));
+    } else {
+      // Surrogate pair
+      i++;
+      if (i >= str.length) {
+        throw Exception("Invalid UTF-16 string");
+      }
+      int nextCharCode = str.codeUnitAt(i);
+      data = 0x10000 + (((data & 0x3ff) << 10) | (nextCharCode & 0x3ff));
+      utf8.add(0xf0 | (data >> 18));
+      utf8.add(0x80 | ((data >> 12) & 0x3f));
+      utf8.add(0x80 | ((data >> 6) & 0x3f));
+      utf8.add(0x80 | (data & 0x3f));
+    }
+  }
+
+  return Uint8List.fromList(utf8);
+}
+
 bool arraysEqual(List a, List b) {
   if (a.length != b.length) return false;
   return a.every((e) => b.contains(e));

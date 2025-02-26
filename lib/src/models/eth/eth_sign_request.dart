@@ -27,7 +27,14 @@ class EthSignRequestUR extends UR {
 
   EthSignRequestUR({required UR ur, required this.uuid, required this.chainId, required this.dataType, required this.data, required this.address, this.origin = ''}) : super(payload: ur.payload, type: ur.type);
 
-  factory EthSignRequestUR.fromTypedTransaction({required EthTxData tx, required String address, required String path, required String origin, Uint8List? uuid, required String xfp}) {
+  factory EthSignRequestUR.fromTypedTransaction({
+    required EthTxData tx,
+    required String address,
+    required String path,
+    required String origin,
+    required String xfp,
+    Uint8List? uuid
+  }) {
     uuid ??= _generateUUid();
     final dataType = tx.txType == EthTxType.legacy ? EthSignDataType.ETH_TRANSACTION_DATA : EthSignDataType.ETH_TYPED_TRANSACTION;
     final addr = EthereumAddress.fromHex(address);
@@ -53,6 +60,39 @@ class EthSignRequestUR extends UR {
     item.setTx(tx);
 
     return item;
+  }
+
+  factory EthSignRequestUR.fromMessage({
+    required EthSignDataType dataType,
+    required String address,
+    required String path,
+    required String origin,
+    required String xfp,
+    required String signData,
+    required int chainId,
+    Uint8List? uuid
+  }) {
+    uuid ??= _generateUUid();
+    final addr = EthereumAddress.fromHex(address);
+    final msg = fromHex(signData);
+
+    final ur = UR.fromCBOR(
+      type: ETH_SIGN_REQUEST,
+      value: CborMap({
+        CborSmallInt(1): CborBytes(uuid, tags: [37]),
+        CborSmallInt(2): CborBytes(msg),
+        CborSmallInt(3): CborSmallInt(dataType.index),
+        CborSmallInt(4): CborSmallInt(chainId),
+        CborSmallInt(5):  CborMap({
+          CborSmallInt(1): CborList(getPath(path)),
+          CborSmallInt(2): CborInt(toXfpCode(xfp))
+        }, tags: [304]),
+        CborSmallInt(6): CborBytes(addr.addressBytes),
+        CborSmallInt(7): CborString(origin)
+      })
+    );
+
+    return EthSignRequestUR(ur: ur, uuid: uuid, chainId: chainId, dataType: dataType, data: msg, address: addr, origin: origin);
   }
 
   factory EthSignRequestUR.fromUR({required UR ur}) {

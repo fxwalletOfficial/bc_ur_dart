@@ -25,6 +25,17 @@ class EthSignatureUR extends UR {
     return EthSignatureUR(uuid: uuid, signature: signature, type: ur.type, payload: ur.payload);
   }
 
+  factory EthSignatureUR.fromMessageSigned({required EthSignRequestUR request, required String signature}) {
+    final ur = UR.fromCBOR(
+      type: ETH_SIGNATURE,
+      value: CborMap({
+        CborSmallInt(1): CborBytes(request.uuid, tags: [37]),
+        CborSmallInt(2): CborBytes(fromHex(signature))
+      })
+    );
+    return EthSignatureUR(uuid: request.uuid, signature: fromHex(signature), type: ETH_SIGNATURE, payload: ur.payload);
+  }
+
   factory EthSignatureUR.fromSignature({required EthSignRequestUR request, required BigInt r, required BigInt s, required int v}) {
     int vData = handleV(v);
     final signature = Uint8List.fromList(bigIntToByte(r, 32) + bigIntToByte(s, 32) + [vData]);
