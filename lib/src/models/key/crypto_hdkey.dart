@@ -9,44 +9,25 @@ import 'package:bc_ur_dart/src/utils/utils.dart';
 
 const String CRYPTO_HD_KEY = 'CRYPTO-HDKEY';
 
-/// ; An hd-key must be a derived key.
-/// hd-key = {
-///     derived-key
-/// }
-/// ; A derived key must be public, has an optional chain code, and
-/// ; may carry additional metadata about its use and derivation.
-/// ; To maintain isomorphism with [BIP32] and allow keys to be derived from
-/// ; this key `chain-code`, `origin`, and `parent-fingerprint` must be present.
-/// ; If `origin` contains only a single derivation step and also contains `source-fingerprint`,
-/// ; then `parent-fingerprint` MUST be identical to `source-fingerprint` or may be omitted.
-/// derived-key = (
-///     key-data: key-data-bytes,
-///     ? chain-code: chain-code-bytes       ; omit if no further keys may be derived from this key
-///     ? origin: #6.304(crypto-keypath),    ; How the key was derived
-///     ? name: text,                        ; A short name for this key.
-///     ? source: text,                      ; The device info or any other description for this key
-/// )
-/// key-data = 3
-/// chain-code = 4
-/// origin = 6
-/// name = 9
-/// source = 10
-///
-/// uint8 = uint .size 1
-/// key-data-bytes = bytes .size 33
-/// chain-code-bytes = bytes .size 32
-
 class CryptoHDKeyUR extends UR {
   final BIP32 wallet;
   final String path;
   final String name;
+  final String? xfp;
 
-  CryptoHDKeyUR({required UR ur, required this.path, required this.name, required this.wallet}) : super(payload: ur.payload, type: ur.type);
+  CryptoHDKeyUR({
+    required UR ur,
+    required this.path,
+    required this.name,
+    required this.wallet,
+    this.xfp
+  }) : super(payload: ur.payload, type: ur.type);
 
   CryptoHDKeyUR.fromWallet({
     required this.name,
     required this.path,
-    required this.wallet
+    required this.wallet,
+    this.xfp
   }) : super.fromCBOR(
     type: CRYPTO_HD_KEY,
     value: CborMap({
@@ -56,7 +37,7 @@ class CryptoHDKeyUR extends UR {
         CborSmallInt(1): CborList(getPath(path)),
         CborSmallInt(2): CborInt(BigInt.from(wallet.parentFingerprint))
       }, tags: [304]),
-      CborSmallInt(8): CborInt(BigInt.from(wallet.parentFingerprint)),
+      CborSmallInt(8): CborInt(xfp == null || xfp.isEmpty ? BigInt.from(wallet.parentFingerprint) : toXfpCode(xfp, bigEndian: false)),
       CborSmallInt(9): CborString(name)
     })
   );

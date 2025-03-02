@@ -1,13 +1,11 @@
 import 'dart:typed_data';
 
 import 'package:bc_ur_dart/bc_ur_dart.dart';
-import 'package:bc_ur_dart/src/models/eth/eth_sign_request.dart';
-import 'package:bc_ur_dart/src/ur.dart';
 import 'package:convert/convert.dart';
-import 'package:crypto_wallet_util/crypto_utils.dart';
 import 'package:test/test.dart';
 
 void main() {
+  const String MASTER_FINGERPRINT = '4245356866';
   final path = "m/44'/60'/0'/0/0";
   final chainId = 1;
   final address = '0x68c6Fe222de676e9db081253fd808922047626eC';

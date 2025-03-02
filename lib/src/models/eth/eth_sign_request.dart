@@ -1,13 +1,9 @@
 import 'dart:typed_data';
 
-import 'package:cbor/cbor.dart';
+import 'package:bc_ur_dart/bc_ur_dart.dart';
 import 'package:convert/convert.dart';
-import 'package:crypto_wallet_util/crypto_utils.dart';
 import 'package:uuid/uuid.dart';
 import 'package:web3dart/web3dart.dart';
-
-import 'package:bc_ur_dart/src/ur.dart';
-import 'package:bc_ur_dart/src/utils/utils.dart';
 
 const String ETH_SIGN_REQUEST = 'ETH-SIGN-REQUEST';
 
@@ -19,13 +15,23 @@ class EthSignRequestUR extends UR {
 
   final EthereumAddress address;
   final String origin;
+  final String xfp;
 
   EthTxType get txType => _tx.txType;
 
   EthTxData _tx = Eip1559TxData(data: EthTxDataRaw(nonce: 0, gasLimit: 0, value: BigInt.zero), network: TxNetwork(chainId: 1));
   EthTxData get tx => _tx;
 
-  EthSignRequestUR({required UR ur, required this.uuid, required this.chainId, required this.dataType, required this.data, required this.address, this.origin = ''}) : super(payload: ur.payload, type: ur.type);
+  EthSignRequestUR({
+    required UR ur,
+    required this.uuid,
+    required this.chainId,
+    required this.dataType,
+    required this.data,
+    required this.address,
+    required this.xfp,
+    this.origin = ''
+  }) : super(payload: ur.payload, type: ur.type);
 
   factory EthSignRequestUR.fromTypedTransaction({
     required EthTxData tx,
@@ -33,6 +39,7 @@ class EthSignRequestUR extends UR {
     required String path,
     required String origin,
     required String xfp,
+    bool xfpReverse = true,
     Uint8List? uuid
   }) {
     uuid ??= _generateUUid();
@@ -49,14 +56,24 @@ class EthSignRequestUR extends UR {
         CborSmallInt(4): CborSmallInt(tx.network.chainId),
         CborSmallInt(5):  CborMap({
           CborSmallInt(1): CborList(getPath(path)),
-          CborSmallInt(2): CborInt(toXfpCode(xfp))
+          if (xfp.isNotEmpty) CborSmallInt(2): CborInt(toXfpCode(xfp, bigEndian: xfpReverse))
         }, tags: [304]),
         CborSmallInt(6): CborBytes(addr.addressBytes),
         CborSmallInt(7): CborString(origin)
       })
     );
 
-    final item = EthSignRequestUR(ur: ur, uuid: uuid, chainId: tx.network.chainId, dataType: dataType, data: msg, address: addr, origin: origin);
+    final item = EthSignRequestUR(
+      ur: ur,
+      uuid: uuid,
+      chainId: tx.network.chainId,
+      dataType: dataType,
+      data: msg,
+      address: addr,
+      origin: origin,
+      xfp: xfp
+    );
+
     item.setTx(tx);
 
     return item;
@@ -70,6 +87,7 @@ class EthSignRequestUR extends UR {
     required String xfp,
     required String signData,
     required int chainId,
+    bool xfpReverse = true,
     Uint8List? uuid
   }) {
     uuid ??= _generateUUid();
@@ -85,18 +103,27 @@ class EthSignRequestUR extends UR {
         CborSmallInt(4): CborSmallInt(chainId),
         CborSmallInt(5):  CborMap({
           CborSmallInt(1): CborList(getPath(path)),
-          CborSmallInt(2): CborInt(toXfpCode(xfp))
+          if (xfp.isNotEmpty) CborSmallInt(2): CborInt(toXfpCode(xfp, bigEndian: xfpReverse))
         }, tags: [304]),
         CborSmallInt(6): CborBytes(addr.addressBytes),
         CborSmallInt(7): CborString(origin)
       })
     );
 
-    return EthSignRequestUR(ur: ur, uuid: uuid, chainId: chainId, dataType: dataType, data: msg, address: addr, origin: origin);
+    return EthSignRequestUR(
+      ur: ur,
+      uuid: uuid,
+      chainId: chainId,
+      dataType: dataType,
+      data: msg,
+      address: addr,
+      origin: origin,
+      xfp: xfp
+    );
   }
 
   factory EthSignRequestUR.fromUR({required UR ur}) {
-    if (ur.type.toUpperCase() != ETH_SIGN_REQUEST) throw Exception('Invalid type');
+    if (ur.type.toUpperCase() != ETH_SIGN_REQUEST) throw Exception(URExceptionType.invalidType.toString());
 
     final data = ur.decodeCBOR() as CborMap;
 
@@ -107,7 +134,23 @@ class EthSignRequestUR extends UR {
     final address = EthereumAddress(Uint8List.fromList((data[CborSmallInt(6)] as CborBytes).bytes));
     final origin = data[CborSmallInt(7)] == null ? '' : (data[CborSmallInt(7)] as CborString).toString();
 
-    final item = EthSignRequestUR(ur: ur, uuid: uuid, chainId: chainId, dataType: dataType, data: msg, address: address, origin: origin);
+    String xfp = '';
+    try {
+      xfp = ((data[CborSmallInt(5)] as CborMap)[CborSmallInt(2)] as CborString).toString();
+    } catch (e) {
+      xfp = '';
+    }
+
+    final item = EthSignRequestUR(
+      ur: ur,
+      uuid: uuid,
+      chainId: chainId,
+      dataType: dataType,
+      data: msg,
+      address: address,
+      origin: origin,
+      xfp: xfp
+    );
 
     switch (dataType) {
       case EthSignDataType.ETH_TRANSACTION_DATA:

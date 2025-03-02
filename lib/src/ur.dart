@@ -10,7 +10,6 @@ import 'package:bc_ur_dart/src/utils/error.dart';
 import 'package:bc_ur_dart/src/models/common/seq.dart';
 import 'package:bc_ur_dart/src/utils/type.dart';
 import 'package:bc_ur_dart/src/utils/utils.dart';
-import 'package:uuid/uuid.dart';
 
 class UR {
   String _type = '';
@@ -277,7 +276,7 @@ class UR {
 
   /// Calculate suitable fragment length.
   int _getFragmentLength() {
-    if (maxLength < minLength || maxLength <= 0 || minLength <= 0) throw Exception('Invalid params');
+    if (maxLength < minLength || maxLength <= 0 || minLength <= 0) throw Exception(URExceptionType.invalidParams.toString());
 
     final maxCount = (payload.length / minLength).ceil();
     int length = 0;
@@ -298,6 +297,4 @@ class UR {
 
     return Uint8List.fromList(result);
   }
-
-  static Uint8List _generateUUid() => Uuid().v8obj().toBytes();
 }

@@ -125,7 +125,7 @@ List<CborValue> getPath(String path) {
   return items;
 }
 
-String getXfp(BigInt xfpCode) {
+String getXfp(BigInt xfpCode, {bool bigEndian = true}) {
   String code = xfpCode.toRadixString(16);
   if (code.length < 8) {
     final len = code.length;
@@ -135,12 +135,12 @@ String getXfp(BigInt xfpCode) {
   }
 
   final bytes = Uint8List.fromList(hex.decode(code));
-  final reverse = bytes.reversed.toList();
+  final reverse = bigEndian ? bytes.reversed.toList() : bytes;
   return hex.encode(Uint8List.fromList(reverse));
 }
 
-BigInt toXfpCode(String xfp) {
-  final reverse = Uint8List.fromList(hex.decode(xfp)).reversed.toList();
+BigInt toXfpCode(String xfp, {bool bigEndian = true}) {
+  final reverse = bigEndian ? Uint8List.fromList(hex.decode(xfp)).reversed.toList() : Uint8List.fromList(hex.decode(xfp)).toList();
   return BigInt.parse(hex.encode(reverse), radix: 16);
 }
 

@@ -37,3 +37,7 @@
 ## 0.1.10
 
 - Feature: Support typed data and raw data of evm transaction types.
+
+## 0.1.11
+
+- Handle the master fingerprint of CryptoHdKey.

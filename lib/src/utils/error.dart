@@ -18,7 +18,9 @@ class InvalidSequenceURException extends URException {
 
 enum URExceptionType {
   invalidFormat,
-  invalidSequence
+  invalidSequence,
+  invalidType,
+  invalidParams
 }
 
 extension _URExceptionTypeExtension on URExceptionType {
@@ -28,6 +30,10 @@ extension _URExceptionTypeExtension on URExceptionType {
         return 'Invalid Format';
       case URExceptionType.invalidSequence:
         return 'Invalid Sequence';
+      case URExceptionType.invalidType:
+        return 'Invalid Type';
+      case URExceptionType.invalidParams:
+        return 'Invalid Params';
     }
   }
 }
