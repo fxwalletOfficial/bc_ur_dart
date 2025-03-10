@@ -122,7 +122,7 @@ class EthSignRequestUR extends UR {
     );
   }
 
-  factory EthSignRequestUR.fromUR({required UR ur}) {
+  factory EthSignRequestUR.fromUR({required UR ur, bool bigEndian = true}) {
     if (ur.type.toUpperCase() != ETH_SIGN_REQUEST) throw Exception(URExceptionType.invalidType.toString());
 
     final data = ur.decodeCBOR() as CborMap;
@@ -136,7 +136,7 @@ class EthSignRequestUR extends UR {
 
     String xfp = '';
     try {
-      xfp = ((data[CborSmallInt(5)] as CborMap)[CborSmallInt(2)] as CborString).toString();
+      xfp = getXfp(((data[CborSmallInt(5)] as CborMap)[CborSmallInt(2)] as CborInt).toBigInt(), bigEndian: bigEndian);
     } catch (e) {
       xfp = '';
     }

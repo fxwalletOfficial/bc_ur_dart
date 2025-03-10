@@ -78,10 +78,10 @@ class CryptoHDKeyUR extends UR {
   @override
   String toString() => '''
 {
-"derivationPath":"$path"
-"masterFingerprint":"${hex.encode(wallet.fingerprint)}"
+"derivationPath":"$path",
+"masterFingerprint":"${hex.encode(wallet.fingerprint)}",
 "extendedPublicKey": "${wallet.toBase58()}",
-"chainCode": "${hex.encode(wallet.chainCode)}"
+"chainCode": "${hex.encode(wallet.chainCode)}",
 "walletName":"$name"
 }
   ''';

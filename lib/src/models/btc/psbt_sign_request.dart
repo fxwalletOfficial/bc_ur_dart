@@ -13,10 +13,18 @@ class PsbtSignRequestUR extends UR {
   final BtcSignDataType dataType;
   final String psbt;
   final String path;
+  final String xfp;
 
-  PsbtSignRequestUR({required UR ur, required this.uuid, required this.dataType, required this.psbt, required this.path}) : super(payload: ur.payload, type: ur.type);
+  PsbtSignRequestUR({required UR ur, required this.uuid, required this.dataType, required this.psbt, required this.path, required this.xfp}) : super(payload: ur.payload, type: ur.type);
 
-  factory PsbtSignRequestUR.fromTypedTransaction({required String path, Uint8List? uuid, required String psbt, required String xfp, required String origin}) {
+  factory PsbtSignRequestUR.fromTypedTransaction({
+    required String path,
+    required String psbt,
+    required String xfp,
+    required String origin,
+    Uint8List? uuid,
+    bool xfpReverse = true
+  }) {
     uuid ??= _generateUUid();
     final dataType = BtcSignDataType.TRANSACTION;
 
@@ -27,13 +35,13 @@ class PsbtSignRequestUR extends UR {
         CborSmallInt(2): CborBytes(fromHex(psbt), tags: [40310]),
         CborSmallInt(3): CborMap({
           CborSmallInt(1): CborList(getPath(path)),
-          CborSmallInt(2): CborInt(toXfpCode(xfp))
+          if (xfp.isNotEmpty) CborSmallInt(2): CborInt(toXfpCode(xfp, bigEndian: xfpReverse))
         }, tags: [40304]),
         CborSmallInt(4): CborString(origin)
       })
     );
 
-    final item = PsbtSignRequestUR(ur: ur, uuid: uuid, path: path, psbt: psbt, dataType: dataType);
+    final item = PsbtSignRequestUR(ur: ur, uuid: uuid, path: path, psbt: psbt, dataType: dataType, xfp: xfp);
 
     return item;
   }

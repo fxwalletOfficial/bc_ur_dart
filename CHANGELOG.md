@@ -41,3 +41,7 @@
 ## 0.1.11
 
 - Handle the master fingerprint of CryptoHdKey.
+
+## 0.1.12
+
+- Handle the xfp format.
