@@ -21,7 +21,7 @@ class CryptoMultiAccountsUR extends UR {
     final masterFingerprint = (data[CborSmallInt(1)] as CborInt).toBigInt();
 
     final chains = (data[CborSmallInt(2)] as CborList);
-    List<CryptoAccountItemUR> chainList = [];
+    final chainList = <CryptoAccountItemUR>[];
 
     for (final item in chains) {
       final chainInfo = CryptoAccountItemUR.fromCborMap(item as CborMap);
@@ -32,6 +32,27 @@ class CryptoMultiAccountsUR extends UR {
     final walletName = data[CborSmallInt(6)].toString();
 
     return CryptoMultiAccountsUR(ur: ur, chains: chainList, device: name, walletName: walletName, masterFingerprint: getXfp(masterFingerprint));
+  }
+
+  static CryptoMultiAccountsUR fromWallet({
+    required BigInt masterFingerprint,
+    required String device,
+    required String walletName,
+    String version = '1.0.0',
+    required List<CryptoAccountItemUR> chains
+  }) {
+    final ur = UR.fromCBOR(
+      type: CRYPTO_MULTI_ACCOUNTS,
+      value: CborMap({
+        CborSmallInt(1): CborInt(masterFingerprint),
+        CborSmallInt(2): CborList(chains.map((e) => e.decodeCBOR()).toList()),
+        CborSmallInt(3): CborString(device),
+        CborSmallInt(5): CborString(version),
+        CborSmallInt(6): CborString(walletName)
+      })
+    );
+
+    return CryptoMultiAccountsUR(ur: ur, chains: chains, device: device, walletName: walletName, masterFingerprint: getXfp(masterFingerprint));
   }
 }
 
@@ -55,10 +76,12 @@ class CryptoAccountItemUR extends UR {
     required this.chains,
     required this.publicKey,
     this.wallet,
-    this.coin = ''
+    this.coin = '',
+    List<int> tags = const []
   }) : super.fromCBOR(
     type: CRYPTO_MULTI_ACCOUNTS,
     value: CborMap({
+      CborSmallInt(2): CborBool(false),
       CborSmallInt(3): CborBytes(publicKey),
       if (wallet != null) CborSmallInt(4): CborBytes(wallet.chainCode),
       CborSmallInt(6):  CborMap({
@@ -69,7 +92,7 @@ class CryptoAccountItemUR extends UR {
       CborSmallInt(10): CborMap({
         CborString('chain'): CborList(chains.map((e) => CborString(e)).toList())
       })
-    })
+    }, tags: tags)
   );
 
   static CryptoAccountItemUR? fromCborMap(CborMap data) {

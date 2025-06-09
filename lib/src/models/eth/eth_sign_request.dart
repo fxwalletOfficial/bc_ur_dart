@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:bc_ur_dart/bc_ur_dart.dart';
 import 'package:convert/convert.dart';
-import 'package:uuid/uuid.dart';
 import 'package:web3dart/web3dart.dart';
 
 const String ETH_SIGN_REQUEST = 'ETH-SIGN-REQUEST';
@@ -42,7 +41,7 @@ class EthSignRequestUR extends UR {
     bool xfpReverse = true,
     Uint8List? uuid
   }) {
-    uuid ??= _generateUUid();
+    uuid ??= UR.generateUUid();
     final dataType = tx.txType == EthTxType.legacy ? EthSignDataType.ETH_TRANSACTION_DATA : EthSignDataType.ETH_TYPED_TRANSACTION;
     final addr = EthereumAddress.fromHex(address);
     final msg = tx.serialize(sig: false);
@@ -90,7 +89,7 @@ class EthSignRequestUR extends UR {
     bool xfpReverse = true,
     Uint8List? uuid
   }) {
-    uuid ??= _generateUUid();
+    uuid ??= UR.generateUUid();
     final addr = EthereumAddress.fromHex(address);
     final msg = fromHex(signData);
 
@@ -193,8 +192,6 @@ class EthSignRequestUR extends UR {
 
   String _token = '';
   String get token => _token;
-
-  static Uint8List _generateUUid() => Uuid().v8obj().toBytes();
 }
 
 enum EthSignDataType {

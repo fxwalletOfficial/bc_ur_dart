@@ -1,10 +1,11 @@
 import 'dart:typed_data';
 
+import 'package:bc_ur_dart/src/utils/error.dart';
 import 'package:cbor/cbor.dart';
-import 'package:uuid/uuid.dart';
 
 import 'package:bc_ur_dart/src/ur.dart';
 import 'package:bc_ur_dart/src/utils/utils.dart';
+import 'package:crypto_wallet_util/utils.dart' show hexUint8List;
 
 const String PSBT_SIGN_REQUEST = 'PSBT-SIGN-REQUEST';
 
@@ -25,7 +26,7 @@ class PsbtSignRequestUR extends UR {
     Uint8List? uuid,
     bool xfpReverse = true
   }) {
-    uuid ??= _generateUUid();
+    uuid ??= UR.generateUUid();
     final dataType = BtcSignDataType.TRANSACTION;
 
     final ur = UR.fromCBOR(
@@ -46,7 +47,26 @@ class PsbtSignRequestUR extends UR {
     return item;
   }
 
-  static Uint8List _generateUUid() => Uuid().v8obj().toBytes();
+  factory PsbtSignRequestUR.fromUR({required UR ur, bool bigEndian = true}) {
+    if (ur.type.toUpperCase() != PSBT_SIGN_REQUEST) throw Exception(URExceptionType.invalidType.toString());
+
+    final data = ur.decodeCBOR() as CborMap;
+
+    final uuid = Uint8List.fromList((data[CborSmallInt(1)] as CborBytes).bytes);
+    final psbt = Uint8List.fromList((data[CborSmallInt(2)] as CborBytes).bytes);
+
+    final components = (data[CborSmallInt(4)] as CborMap)[CborSmallInt(1)] as CborList;
+    String path = 'm';
+    for (final item in components) {
+      if (item is CborSmallInt) path += '/${item.value}';
+      if (item is CborBool && item.value) path += "'";
+    }
+
+    final xfp = (data[CborSmallInt(4)] as CborMap)[CborSmallInt(2)] == null ? '' : getXfp(((data[CborSmallInt(4)] as CborMap)[CborSmallInt(2)] as CborInt).toBigInt(), bigEndian: bigEndian);
+
+    final item = PsbtSignRequestUR(ur: ur, uuid: uuid, path: path, psbt: psbt.toHex(), dataType: BtcSignDataType.TRANSACTION, xfp: xfp);
+    return item;
+  }
 }
 
 enum BtcSignDataType {

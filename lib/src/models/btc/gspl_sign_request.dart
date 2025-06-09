@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 import 'package:bc_ur_dart/src/models/btc/gspl_tx_data.dart';
 import 'package:bc_ur_dart/src/models/btc/psbt_sign_request.dart';
+import 'package:bc_ur_dart/src/utils/error.dart';
 import 'package:cbor/cbor.dart';
-import 'package:uuid/uuid.dart';
 
 import 'package:bc_ur_dart/src/ur.dart';
 import 'package:bc_ur_dart/src/utils/utils.dart';
@@ -27,8 +27,8 @@ class GsplSignRequestUR extends UR {
     Uint8List? uuid,
     bool xfpReverse = true
   }) {
-    uuid ??= _generateUUid();
-    final GsplTxData gspl = GsplTxData(dataType: BtcSignDataType.TRANSACTION, inputs: inputs, change: change, hex: hex);
+    uuid ??= UR.generateUUid();
+    final gspl = GsplTxData(dataType: BtcSignDataType.TRANSACTION, inputs: inputs, change: change, hex: hex);
 
     final ur = UR.fromCBOR(
       type: BTC_SIGN_REQUEST,
@@ -48,5 +48,28 @@ class GsplSignRequestUR extends UR {
     return item;
   }
 
-  static Uint8List _generateUUid() => Uuid().v8obj().toBytes();
+  factory GsplSignRequestUR.fromUR({required UR ur, bool bigEndian = true}) {
+    if (ur.type.toUpperCase() != BTC_SIGN_REQUEST) throw Exception(URExceptionType.invalidType.toString());
+
+    final data = ur.decodeCBOR() as CborMap;
+
+    final uuid = Uint8List.fromList((data[CborSmallInt(1)] as CborBytes).bytes);
+    final gsplTxData = GsplTxData.fromCbor(data: data[CborSmallInt(2)] as CborMap);
+    final components = (data[CborSmallInt(3)] as CborMap)[CborSmallInt(1)] as CborList;
+
+    String path = 'm';
+    for (final item in components) {
+      if (item is CborSmallInt) path += '/${item.value}';
+      if (item is CborBool && item.value) path += "'";
+    }
+
+    String xfp = '';
+    try {
+      xfp = getXfp(((data[CborSmallInt(3)] as CborMap)[CborSmallInt(2)] as CborInt).toBigInt(), bigEndian: bigEndian);
+    } catch (e) {
+      xfp = '';
+    }
+
+    return GsplSignRequestUR(ur: ur, uuid: uuid, path: path, gsplTxData: gsplTxData, xfp: xfp);
+  }
 }
