@@ -89,9 +89,7 @@ class CryptoAccountItemUR extends UR {
         if (wallet != null) CborSmallInt(2): CborInt(BigInt.from(wallet.parentFingerprint))
       }, tags: [304]),
       if (wallet != null) CborSmallInt(8): CborInt(BigInt.from(wallet.parentFingerprint)),
-      CborSmallInt(10): CborMap({
-        CborString('chain'): CborList(chains.map((e) => CborString(e)).toList())
-      })
+      CborSmallInt(10): CborString(json.encode({'chain': chains}))
     }, tags: tags)
   );
 
