@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:bc_ur_dart/bc_ur_dart.dart';
 import 'package:bip32/bip32.dart';
+import 'package:convert/convert.dart';
 
 const String CRYPTO_MULTI_ACCOUNTS = 'CRYPTO-MULTI-ACCOUNTS';
 
@@ -54,6 +55,16 @@ class CryptoMultiAccountsUR extends UR {
 
     return CryptoMultiAccountsUR(ur: ur, chains: chains, device: device, walletName: walletName, masterFingerprint: getXfp(masterFingerprint));
   }
+
+  @override
+  String toString() => '''
+{
+"masterFingerprint":"$masterFingerprint",
+"device":"$device",
+"walletName":"$walletName",
+"chains":${chains.map((e) => e.toString()).join(',')}
+}
+  ''';
 }
 
 class CryptoAccountItemUR extends UR {
@@ -132,4 +143,13 @@ class CryptoAccountItemUR extends UR {
 
     return CryptoAccountItemUR(path: path, wallet: wallet, chains: chains, publicKey: publicKey);
   }
+
+  @override
+  String toString() => '''
+{
+"derivationPath":"$path",
+"masterFingerprint":"${hex.encode(wallet?.fingerprint ?? Uint8List(0))}",
+"extendedPublicKey": "${wallet?.toBase58()}",
+"chainCode": "${hex.encode(wallet?.chainCode ?? Uint8List(0))}"
+}''';
 }
