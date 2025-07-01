@@ -57,3 +57,7 @@
 ## 0.1.15
 
 - Update: Update CryptoMultiAccountsUR toString().
+
+## 0.1.16
+
+- Fix: Fixed CryptoMultiAccountsUR XRP get from wallet.

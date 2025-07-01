@@ -42,10 +42,12 @@ class CryptoMultiAccountsUR extends UR {
     String version = '1.0.0',
     required List<CryptoAccountItemUR> chains
   }) {
+    final xfp = getXfp(masterFingerprint);
+
     final ur = UR.fromCBOR(
       type: CRYPTO_MULTI_ACCOUNTS,
       value: CborMap({
-        CborSmallInt(1): CborInt(masterFingerprint),
+        CborSmallInt(1): CborInt(BigInt.parse(xfp, radix: 16)),
         CborSmallInt(2): CborList(chains.map((e) => e.decodeCBOR()).toList()),
         CborSmallInt(3): CborString(device),
         CborSmallInt(5): CborString(version),
@@ -53,7 +55,7 @@ class CryptoMultiAccountsUR extends UR {
       })
     );
 
-    return CryptoMultiAccountsUR(ur: ur, chains: chains, device: device, walletName: walletName, masterFingerprint: getXfp(masterFingerprint));
+    return CryptoMultiAccountsUR(ur: ur, chains: chains, device: device, walletName: walletName, masterFingerprint: xfp);
   }
 
   @override
